@@ -1,0 +1,38 @@
+/* Ensure body allows scrolling while keeping sticky elements functional */
+body {
+    overflow-x: hidden;
+}
+
+/* Wrap the main content and apply the scrollbar styles */
+.scroll-wrapper {
+    overflow-y: auto;  /* Enables scrolling */
+    height: 100vh; /* Full viewport height */
+}
+
+/* Modern white scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    transition: opacity 0.5s ease-in-out;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+/* Auto-hide scrollbar */
+.scroll-wrapper::-webkit-scrollbar {
+    opacity: 0;
+}
+
+.scroll-wrapper:hover::-webkit-scrollbar {
+    opacity: 1;
+}

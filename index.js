@@ -6,9 +6,8 @@ const Chat = require("./models/chat.js");
 const port = 3000;
 
 
-express.urlencoded({extended : true});
-
-
+app.use(express.urlencoded({extended : true}));
+app.use(express.json());
 app.set("views", path.join(__dirname, "views"));
 app.set("view engiene", "ejs");
 
@@ -47,6 +46,21 @@ app.get("/", async (req, res) => {
     let chats = await Chat.find();
     console.log(chats);
     res.render("index.ejs", {chats});
+})
+
+app.post("/send-chat", async(req, res) => {
+    const {from, to, message} = req.body;
+    console.log("Updated Message Received:", { from, to, message });
+    let chat = new Chat({
+        from : from,
+        to : to,
+        message : message,
+        created_at : new Date()
+    })
+
+    Chat.insertOne(chat);
+    
+    res.status(200).send("Message updated successfully");
 })
 
 // mongoose.connection.close();
