@@ -30,7 +30,7 @@
         </nav>
         <div class="p-4 chatContainer">
             <% chats.forEach(e=> { %>
-                <div class="card m-2 chat" style="width: 18rem;">
+                <div class="card m-2 chat" style="width: 18rem;" data-chat-id="<%= e._id %>">
                     <div class="card-header">
                         To : <%= e.to %>
                     </div>

@@ -1,6 +1,6 @@
 const chats = document.getElementsByClassName("chat");
 
-
+// to show different alert in homescreen.
 function showFloatingAlert(message, type = "success") {
     // Create the alert div
     const alertDiv = document.createElement("div");
@@ -24,32 +24,44 @@ function showFloatingAlert(message, type = "success") {
 
 
 
-
+//sending the edit message request to backend
 function finaliseEdit(card) {
+
     let to = card.querySelector(".card-header");
     let from = card.querySelector(".card-title");
     let message = card.querySelector(".card-text");
 
+
     let formField_from = document.querySelector("#from");
     let formField_to = document.querySelector("#to");
     let formField_message = document.querySelector("#message");
+
+
+    let id = card.dataset.chatId
     let actionButton = document.querySelector("#action");
 
-    from.innerText = from.innerText.split(":")[0] + "  " + formField_from.value;
-    to.innerText = to.innerText.split(":")[0] + "  " + formField_to.value;
-    message.innerText = formField_message.value;
+    console.log(id);
 
-    card.classList.remove("bg-primary-subtle");
+
 
     let updated = {
-        from: from.innerText,
-        to: to.innerText,
-        message: message.innerText
+        _id: id,
+        from: formField_from.value,
+        to: formField_to.value,
+        message: formField_message.value
     }
 
-    axios.post("/update-message", updated)
+    console.log(updated);
+
+    axios.put("/update-message", updated)
         .then((res) => {
             if (res.status === 200) {
+
+                from.innerText = from.innerText.split(":")[0] + " : " + formField_from.value;
+                to.innerText = to.innerText.split(":")[0] + " : " + formField_to.value;
+                message.innerText = formField_message.value;
+
+                card.classList.remove("bg-primary-subtle");
 
                 formField_from.value = "";
                 formField_to.value = "";
@@ -61,10 +73,10 @@ function finaliseEdit(card) {
             console.log(err);
         })
 
-
-
 }
 
+
+//function to edit an exsisting message
 function editMessage(card) {
     let to = card.querySelector(".card-header").innerText.split(":")[1].trim();
     let from = card.querySelector(".card-title").innerText.split(":")[1].trim();
@@ -91,7 +103,9 @@ function editMessage(card) {
 }
 
 
-function addWithoutReload(chat){
+
+//used by function to send message by adding the new message to DOM without actually reloading the page
+function addWithoutReload(chat) {
 
     let div = `<div class="card m-2 chat" style="width: 18rem;">
                 <div class="card-header">
@@ -115,6 +129,8 @@ function addWithoutReload(chat){
 }
 
 
+
+//function to send a message
 function sendMessage() {
     let formField_from = document.querySelector("#from");
     let formField_to = document.querySelector("#to");
@@ -135,7 +151,7 @@ function sendMessage() {
             if (res.status === 200) {
                 addWithoutReload(chat)
                 showFloatingAlert(`Message sent to ${chat.to}`, "success");
-                
+
                 formField_from.value = "";
                 formField_to.value = "";
                 formField_message.value = "";
@@ -144,11 +160,24 @@ function sendMessage() {
         }).catch(err => {
             console.log(err);
         })
-
-
-
 }
 
+//function to delete a message
+function deleteMessage(card){
+    let id = card.dataset.chatId;
+    console.log(id);
+
+    axios.delete(`/delete-message/${id}`)
+    .then((res) => {
+        console.log(res);
+        if(res.status === 200){
+            card.remove();
+        }
+    }).catch((err) => console.error("Error deleting message:", err));
+}
+
+
+//Looping for edit button
 Array.from(chats).forEach((e) => {
     let edit = e.getElementsByTagName("a")[0];
     edit.addEventListener("click", (event) => {
@@ -157,9 +186,23 @@ Array.from(chats).forEach((e) => {
     })
 })
 
+//looping for delete button
+Array.from(chats).forEach((e) => {
+    let edit = e.getElementsByTagName("a")[1];
+    edit.addEventListener("click", (event) => {
+        // console.log(event.target.closest(".card"));
+        deleteMessage(event.target.closest(".card"));
+    })
+})
+
+
+//Accessing the actio button for the main send message route
 let actionButton = document.querySelector("#action");
 
 actionButton.addEventListener("click", (event) => {
     event.preventDefault();
-    sendMessage();
+    let txt = event.target.innerText;
+    if (txt === "Send") {
+        sendMessage
+    }
 })

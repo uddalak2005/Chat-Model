@@ -6,7 +6,7 @@ const Chat = require("./models/chat.js");
 const port = 3000;
 
 
-app.use(express.urlencoded({extended : true}));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.set("views", path.join(__dirname, "views"));
 app.set("view engiene", "ejs");
@@ -22,12 +22,12 @@ async function main() {
 }
 
 main()
-.then(() => {
-    console.log("connection established");
-}
-).catch((err) => {
-    console.log(err);
-});
+    .then(() => {
+        console.log("connection established");
+    }
+    ).catch((err) => {
+        console.log(err);
+    });
 
 // let chat1 = new Chat({
 //     from : "person1",
@@ -44,23 +44,44 @@ main()
 
 app.get("/", async (req, res) => {
     let chats = await Chat.find();
-    console.log(chats);
-    res.render("index.ejs", {chats});
+    // console.log(chats);
+    res.render("index.ejs", { chats });
 })
 
-app.post("/send-chat", async(req, res) => {
-    const {from, to, message} = req.body;
+app.post("/send-chat", async (req, res) => {
+    const { from, to, message } = req.body;
     console.log("Updated Message Received:", { from, to, message });
     let chat = new Chat({
-        from : from,
-        to : to,
-        message : message,
-        created_at : new Date()
+        from: from,
+        to: to,
+        message: message,
+        created_at: new Date()
     })
 
     Chat.insertOne(chat);
-    
+
     res.status(200).send("Message updated successfully");
 })
 
-// mongoose.connection.close();
+app.put("/update-message", async (req, res) => {
+    const { _id, from, to, message } = req.body;
+    console.log({ _id, from, to, message });
+    let updatedChat = await Chat.findByIdAndUpdate(
+        _id,
+        { from: from, 
+            to: to, 
+            message: message, 
+            created_at : new Date()
+        },
+        {runValidators : true, new: true}
+    );
+    console.log(updatedChat);
+    res.status(200).send("Message updated succesfully");
+})
+
+
+app.delete("/delete-message/:id", async(req, res) => {
+    const {id} = req.params;
+    const deletedChat = await Chat.findByIdAndDelete(id);
+    res.status(200).send("Message deleted successfully");
+})
