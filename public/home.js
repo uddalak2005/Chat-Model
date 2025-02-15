@@ -1,5 +1,35 @@
 const chats = document.getElementsByClassName("chat");
 
+//Accessing the actio button for the main send message route
+let actionButton = document.querySelector("#action");
+
+actionButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    let txt = event.target.innerText;
+    if (txt === "Send") {
+        sendMessage();
+    } 
+});
+
+
+//Looping for edit button
+Array.from(chats).forEach((e) => {
+    let edit = e.getElementsByTagName("a")[0];
+    edit.addEventListener("click", (event) => {
+        // console.log(event.target.closest(".card"));
+        editMessage(event.target.closest(".card"));
+    })
+})
+
+//looping for delete button
+Array.from(chats).forEach((e) => {
+    let del = e.getElementsByTagName("a")[1];
+    del.addEventListener("click", (event) => {
+        console.log(event.target.closest(".card"));
+        deleteMessage(event.target.closest(".card"));
+    })
+})
+
 // to show different alert in homescreen.
 function showFloatingAlert(message, type = "success") {
     // Create the alert div
@@ -38,7 +68,6 @@ function finaliseEdit(card) {
 
 
     let id = card.dataset.chatId
-    let actionButton = document.querySelector("#action");
 
     console.log(id);
 
@@ -106,27 +135,42 @@ function editMessage(card) {
 
 //used by function to send message by adding the new message to DOM without actually reloading the page
 function addWithoutReload(chat) {
+    let div = document.createElement("div");
+    div.className = "card m-2 chat";
+    div.style.width = "18rem";
+    div.dataset.chatId = chat._id;  // Attach the chat _id to the div
 
-    let div = `<div class="card m-2 chat" style="width: 18rem;">
-                <div class="card-header">
-                    To : ${chat.to}}
-                </div>
-                <div class="card-body">
-                    <h5 class="card-title">From : ${chat.from}
-                    </h5>
-                    <p class="card-text">
-                        ${chat.message}
-                    </p>
-                    <div class="d-flex gap-3">
-                        <a href="#" class="btn btn-primary" class="edit">Edit</a>
-                        <a href="#" class="btn btn-danger" class="del">Delete</a>
-                    </div>
-                </div>
-            </div>`
+    div.innerHTML = `
+        <div class="card-header">
+            To : ${chat.to}
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">From : ${chat.from}</h5>
+            <p class="card-text">${chat.message}</p>
+            <div class="d-flex gap-3">
+                <a href="#" class="btn btn-primary edit">Edit</a>
+                <a href="#" class="btn btn-danger del">Delete</a>
+            </div>
+        </div>
+    `;
 
     let container = document.querySelector(".chatContainer");
-    container.insertAdjacentHTML("beforeend", div);
+    container.appendChild(div); // Append new chat card to the container
+
+    let edit = div.querySelector(".edit"); // Get the "Edit" button correctly
+    let del = div.querySelector(".del");  // Get the "Delete" button correctly
+
+    // Event listeners for "Edit" and "Delete" actions
+    edit.addEventListener("click", (event) => {
+        editMessage(event.target.closest(".card")); // Pass the closest card to the editMessage function
+    });
+
+    del.addEventListener("click", (event) => {
+        console.log(event.target.closest(".card"));
+        deleteMessage(event.target.closest(".card")); // Pass the closest card to the deleteMessage function
+    });
 }
+
 
 
 
@@ -149,12 +193,15 @@ function sendMessage() {
     axios.post("/send-chat", chat)
         .then((res) => {
             if (res.status === 200) {
-                addWithoutReload(chat)
+                console.log(res.data)
+                addWithoutReload(res.data);
                 showFloatingAlert(`Message sent to ${chat.to}`, "success");
 
                 formField_from.value = "";
                 formField_to.value = "";
                 formField_message.value = "";
+
+
 
             }
         }).catch(err => {
@@ -163,46 +210,21 @@ function sendMessage() {
 }
 
 //function to delete a message
-function deleteMessage(card){
+function deleteMessage(card) {
     let id = card.dataset.chatId;
     console.log(id);
 
     axios.delete(`/delete-message/${id}`)
-    .then((res) => {
-        console.log(res);
-        if(res.status === 200){
-            card.remove();
-        }
-    }).catch((err) => console.error("Error deleting message:", err));
+        .then((res) => {
+            console.log(res);
+            if (res.status === 200) {
+                card.remove();
+            }
+        }).catch((err) => console.error("Error deleting message:", err));
 }
 
 
-//Looping for edit button
-Array.from(chats).forEach((e) => {
-    let edit = e.getElementsByTagName("a")[0];
-    edit.addEventListener("click", (event) => {
-        // console.log(event.target.closest(".card"));
-        editMessage(event.target.closest(".card"));
-    })
-})
-
-//looping for delete button
-Array.from(chats).forEach((e) => {
-    let edit = e.getElementsByTagName("a")[1];
-    edit.addEventListener("click", (event) => {
-        // console.log(event.target.closest(".card"));
-        deleteMessage(event.target.closest(".card"));
-    })
-})
 
 
-//Accessing the actio button for the main send message route
-let actionButton = document.querySelector("#action");
 
-actionButton.addEventListener("click", (event) => {
-    event.preventDefault();
-    let txt = event.target.innerText;
-    if (txt === "Send") {
-        sendMessage
-    }
-})
+

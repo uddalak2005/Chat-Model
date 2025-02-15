@@ -50,7 +50,7 @@ app.get("/", async (req, res) => {
 
 app.post("/send-chat", async (req, res) => {
     const { from, to, message } = req.body;
-    console.log("Updated Message Received:", { from, to, message });
+    console.log("New Message Received:", { from, to, message });
     let chat = new Chat({
         from: from,
         to: to,
@@ -58,9 +58,9 @@ app.post("/send-chat", async (req, res) => {
         created_at: new Date()
     })
 
-    Chat.insertOne(chat);
+    const savedChat = await chat.save(); // Save to MongoDB and get the new docuemnt as return
 
-    res.status(200).send("Message updated successfully");
+    res.status(200).send(savedChat);
 })
 
 app.put("/update-message", async (req, res) => {
